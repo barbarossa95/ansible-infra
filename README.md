@@ -1,5 +1,9 @@
 # Infra Ansible configuratin by Boba
 
+## Prerequirement
+
+Create and edit `inventory.ini` and `vars/sectets.yml`
+
 ## Dry run
 
 ```bash

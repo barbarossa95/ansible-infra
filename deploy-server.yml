@@ -4,20 +4,34 @@
   become: yes
   vars_files:
     - vars/main.yml
+    - vars/secrets.yml
 
   tasks:
-    - name: Ensure user {{ user_name }} exists
+    - name: Ensure user {{ user_name }} exists with password
       user:
         name: "{{ user_name }}"
         shell: /bin/bash
         groups: sudo
         append: yes
+        password: "{{ user_pass | password_hash('sha512') }}"
         state: present
 
-    - name: Allow passwordless sudo for {{ user_name }}
+    # - name: Allow passwordless sudo for {{ user_name }}
+    #   copy:
+    #     dest: "/etc/sudoers.d/{{ user_name }}"
+    #     content: "{{ user_name }} ALL=(ALL) NOPASSWD: ALL\n"
+    #     validate: "visudo -cf %s"
+    #     mode: 0440
+
+    - name: Remove passwordless sudo configuration
+      file:
+        path: "/etc/sudoers.d/{{ user_name }}"
+        state: absent
+
+    - name: Allow sudo for {{ user_name }} (with password)
       copy:
         dest: "/etc/sudoers.d/{{ user_name }}"
-        content: "{{ user_name }} ALL=(ALL) NOPASSWD: ALL\n"
+        content: "{{ user_name }} ALL=(ALL) NOPASSWD: /usr/bin/docker\n"
         validate: "visudo -cf %s"
         mode: 0440
 
@@ -41,6 +55,7 @@
         state: directory
         owner: "{{ user_name }}"
         group: "{{ user_name }}"
+        recurse: true
         mode: 0755
 
     - name: Create /srv/{{ project_name }}.git directory
@@ -49,6 +64,7 @@
         state: directory
         owner: "{{ user_name }}"
         group: "{{ user_name }}"
+        recurse: true
         mode: 0755
 
     - name: Initialize bare Git repository

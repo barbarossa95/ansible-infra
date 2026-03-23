@@ -16,6 +16,7 @@ vault-pass.txt
 *.key
 *.pem
 *.p12
+./vars/secrets.yml
 
 # Local inventory (if you store IPs/sensitive data)
 inventory.ini
