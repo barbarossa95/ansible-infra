@@ -81,8 +81,4 @@
 
     - name: Print command to add Git remote
       debug:
-        msg: |
-          To add the deployment remote to your local repository, run:
-          git remote add staging ssh://{{ user_name }}@{{ ansible_default_ipv4.address }}/srv/{{ project_name }}.git
-
-          (If the IP shown is not the one you used to connect, replace it with the server's actual IP/hostname.)
+        msg: git remote add staging ssh://{{ user_name }}@{{ ansible_default_ipv4.address }}/srv/{{ project_name }}.git

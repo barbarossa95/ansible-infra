@@ -5,7 +5,7 @@ project_name: "my-app"
 user_name: "boba"
 
 # SSH configuration
-ssh_pub_key_file: "~/.ssh/id_rsa.pub"
+ssh_pub_key_file: "~/.ssh/id_ed25519.pub"
 
 # Docker configuration (for geerlingguy.docker role)
 docker_users:
