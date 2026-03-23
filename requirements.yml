@@ -1,0 +1,4 @@
+# requirements.yml
+roles:
+  - src: geerlingguy.docker
+    version: 7.1.0 # or latest

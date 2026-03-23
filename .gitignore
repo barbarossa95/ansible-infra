@@ -1,0 +1,65 @@
+# .gitignore for Ansible repository
+
+# Ansible specific
+*.retry
+*.log
+.ansible/
+ansible.log
+*.tar.gz
+
+# Environment variables and secrets
+.env
+*.vault
+*.vault-key
+secrets.yml
+vault-pass.txt
+*.key
+*.pem
+*.p12
+
+# Local inventory (if you store IPs/sensitive data)
+inventory.ini
+inventory/
+!inventory.example.ini   # Keep an example template
+hosts
+!hosts.example
+
+# Role dependencies (if you install roles locally)
+roles/
+!roles/requirements.yml  # Keep requirements file
+galaxy-requirements.yml
+
+# Python virtual environment
+venv/
+env/
+.env/
+.venv/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Temporary files
+tmp/
+temp/
+*.tmp

@@ -1,0 +1,88 @@
+---
+- name: Setup deployment environment for a React project
+  hosts: servers
+  become: yes
+  vars_files:
+    - vars/main.yml
+
+  tasks:
+    - name: Ensure user {{ user_name }} exists
+      user:
+        name: "{{ user_name }}"
+        shell: /bin/bash
+        groups: sudo
+        append: yes
+        state: present
+
+    - name: Allow passwordless sudo for {{ user_name }}
+      copy:
+        dest: "/etc/sudoers.d/{{ user_name }}"
+        content: "{{ user_name }} ALL=(ALL) NOPASSWD: ALL\n"
+        validate: "visudo -cf %s"
+        mode: 0440
+
+    - name: Add SSH public key for {{ user_name }}
+      authorized_key:
+        user: "{{ user_name }}"
+        state: present
+        key: "{{ lookup('file', ssh_pub_key_file) }}"
+
+    # Use geerlingguy.docker role to install Docker and manage group
+    - name: Install Docker via geerlingguy.docker role
+      include_role:
+        name: geerlingguy.docker
+      vars:
+        docker_users:
+          - "{{ user_name }}"
+
+    - name: Create /opt/{{ project_name }} directory
+      file:
+        path: "/opt/{{ project_name }}"
+        state: directory
+        owner: "{{ user_name }}"
+        group: "{{ user_name }}"
+        mode: 0755
+
+    - name: Create /srv/{{ project_name }}.git directory
+      file:
+        path: "/srv/{{ project_name }}.git"
+        state: directory
+        owner: "{{ user_name }}"
+        group: "{{ user_name }}"
+        mode: 0755
+
+    - name: Initialize bare Git repository
+      command: git init --bare /srv/{{ project_name }}.git
+      args:
+        creates: "/srv/{{ project_name }}.git/HEAD"
+
+    - name: Create post-receive hook
+      copy:
+        dest: "/srv/{{ project_name }}.git/hooks/post-receive"
+        content: |
+          #!/usr/bin/env bash
+          TARGET="/opt/{{ project_name }}"
+          GIT_DIR="/srv/{{ project_name }}.git"
+          BRANCH="{{ git_branch }}"
+
+          while read oldrev newrev ref
+          do
+              if [[ $ref = refs/heads/$BRANCH ]];
+              then
+                  echo "Ref $ref received. Deploying ${BRANCH} branch to production..."
+                  git --work-tree=$TARGET --git-dir=$GIT_DIR checkout -f $BRANCH
+                  cd $TARGET
+                  bash {{ deploy_script_path }}
+              else
+                  echo "Ref $ref received. Doing nothing: only the ${BRANCH} branch may be deployed on this server."
+              fi
+          done
+        mode: 0755
+
+    - name: Print command to add Git remote
+      debug:
+        msg: |
+          To add the deployment remote to your local repository, run:
+          git remote add staging ssh://{{ user_name }}@{{ ansible_default_ipv4.address }}/srv/{{ project_name }}.git
+
+          (If the IP shown is not the one you used to connect, replace it with the server's actual IP/hostname.)

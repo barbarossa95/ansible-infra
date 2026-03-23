@@ -1,0 +1,29 @@
+# vars/main.yml
+---
+# Project configuration
+project_name: "my-app"
+user_name: "boba"
+
+# SSH configuration
+ssh_pub_key_file: "~/.ssh/id_rsa.pub"
+
+# Docker configuration (for geerlingguy.docker role)
+docker_users:
+  - "{{ user_name }}"
+
+# Docker version (optional - if you need a specific version)
+# docker_version: "20.10"
+
+# Docker daemon options (optional)
+# docker_daemon_options:
+#   log-driver: json-file
+#   log-opts:
+#     max-size: 10m
+#     max-file: 3
+
+# Git configuration
+git_branch: "main"
+deploy_script_path: "scripts/deploy.sh"
+
+# Optional: set this to override the default IP detection
+# server_ip: ""  # If empty, will try to detect automatically
